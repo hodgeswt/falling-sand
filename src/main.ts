@@ -16,12 +16,30 @@ import {
 } from "./world";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
-const canvasContainer = document.getElementById("game-container");
-canvas.width = canvasContainer.clientWidth;
-canvas.height = canvasContainer.clientHeight;
+const canvasContainer = document.getElementById("game-container") as HTMLElement;
 
-let worldSize = getWorldSize(canvas.width, canvas.height, GRAIN_SIZE);
-let world: World = newWorld(worldSize[0], worldSize[1]);
+let world: World = newWorld({ width: 0, height: 0 }, { width: 0, height: 0 });
+
+const resetWorld = () => {
+  canvas.width = canvasContainer.clientWidth;
+  canvas.height = canvasContainer.clientHeight;
+
+  const [gridSize, canvasSize] = getWorldSize(
+    canvas.width,
+    canvas.height,
+    GRAIN_SIZE
+  );
+
+  world = newWorld(gridSize, canvasSize);
+};
+
+resetWorld();
+
+window.addEventListener("resize", resetWorld);
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => resetWorld());
+}
 
 let pointerDown: boolean = false;
 let pointerCoords: Coords = { x: 0, y: 0 };

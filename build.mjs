@@ -18,6 +18,10 @@ await esbuild
             from: ["./src/styles.css"],
             to: ["../css/styles.css"],
           },
+          {
+            from: ["./src/favicon.svg"],
+            to: ["../images/favicon.svg"],
+          },
         ],
       }),
     ],

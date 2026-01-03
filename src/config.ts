@@ -1,6 +1,5 @@
 import { defined, isType } from "./utils";
 
-
 export enum GrainColorMode {
   STATIC = 'Static',
   RAINBOW = 'Rainbow'
@@ -22,7 +21,6 @@ const isConfig = (obj: any): obj is Config => {
     return false;
   }
 
-
   return (
     isType(obj.gravity, 'number')
     && isType(obj.grainSize, 'number')
@@ -38,7 +36,7 @@ const isConfig = (obj: any): obj is Config => {
 const defaultConfig = {
   gravity: 0.5,
   grainSize: 20,
-  grainColorMode: GrainColorMode.STATIC,
+  grainColorMode: GrainColorMode.RAINBOW,
   grainBaseColor: '#E1C16E',
   groundColor: '#6E260E',
   emptyColor: '#ffffff',

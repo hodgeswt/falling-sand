@@ -67,6 +67,26 @@ const toHex = (n: number): string => {
 }
 
 /**
+ * Get 0-255 in hex
+ * @returns 0-255 in hex
+ */
+const getRandChannel = (): string => {
+  return toHex(Math.max(0, Math.min(255, Math.round(Math.random() * 255))));
+}
+
+/**
+ * Get a random RGB hex string
+ * @returns Random RGB hex value
+ */
+export const getRainbowColor = (): string => {
+  const r = getRandChannel();
+  const g = getRandChannel();
+  const b = getRandChannel();
+
+  return `#${r}${g}${b}`;
+}
+
+/**
  * Slightly vary a color
  * @param color Color to vary
  * @returns Varied color

@@ -1,5 +1,5 @@
-import { getConfig } from "./config";
-import { colorGrade, gridPosToCoords, CellType } from "./utils";
+import { getConfig, GrainColorMode } from "./config";
+import { colorGrade, gridPosToCoords, CellType, getRainbowColor } from "./utils";
 import {
   addGrain,
   Coords,
@@ -62,7 +62,6 @@ let prevTime: number = 0.0;
 
 const ctx = canvas.getContext("2d");
 
-
 /**
  * Main game loop
  * @param time Current time
@@ -104,8 +103,15 @@ const gameLoop = (time: number) => {
         if (ctx) {
           let fillColor = world.colorCache[x][y];
           if (fillColor === "") {
-            world.colorCache[x][y] = colorGrade(config.grainBaseColor);
-            fillColor = colorGrade(config.grainBaseColor);
+            if (config.grainColorMode === GrainColorMode.STATIC) {
+              world.colorCache[x][y] = colorGrade(config.grainBaseColor);
+              fillColor = colorGrade(config.grainBaseColor);
+            } else {
+              const c = getRainbowColor();
+              world.colorCache[x][y] = c;
+              fillColor = c;
+            }
+
           }
           ctx.fillStyle = fillColor;
           ctx.fillRect(coords.x, coords.y, config.grainSize, config.grainSize);

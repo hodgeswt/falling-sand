@@ -69,7 +69,6 @@ h1 {
   font-family: inherit;
 }
 .modal-content h2 {
-  margin: 0 0 1rem 0;
   font-family: inherit;
   font-size: 1.5rem;
   font-weight: 400;
@@ -79,7 +78,7 @@ h1 {
   display: flex;
   flex-direction: column;
   font-size: 1rem;
-  margin-bottom: 0.5rem;
+  margin: 4px 0;
   font-family: inherit;
 }
 .modal-content input,
@@ -92,6 +91,7 @@ h1 {
   padding: 0.2rem 0.5rem;
   background: #fff;
 }
+
 .modal-actions {
   display: flex;
   gap: 1rem;

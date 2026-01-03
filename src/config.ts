@@ -1,4 +1,7 @@
-import { defined, isType } from "./utils";
+export const resetConfigToDefault = () => {
+  updateConfig(defaultConfig);
+};
+import { defined, isDarkMode, isType } from "./utils";
 
 export enum GrainColorMode {
   STATIC = 'Static',
@@ -6,7 +9,6 @@ export enum GrainColorMode {
 }
 
 export type Config = {
-  gravity: number;
   grainSize: number;
   grainColorMode: GrainColorMode;
   grainBaseColor: string;
@@ -22,8 +24,7 @@ const isConfig = (obj: any): obj is Config => {
   }
 
   return (
-    isType(obj.gravity, 'number')
-    && isType(obj.grainSize, 'number')
+    isType(obj.grainSize, 'number')
     && isType(obj.grainColorMode, 'string')
     && isType(obj.grainBaseColor, 'string')
     && isType(obj.groundColor, 'string')
@@ -34,12 +35,11 @@ const isConfig = (obj: any): obj is Config => {
 }
 
 const defaultConfig = {
-  gravity: 0.5,
   grainSize: 20,
   grainColorMode: GrainColorMode.RAINBOW,
   grainBaseColor: '#E1C16E',
   groundColor: '#6E260E',
-  emptyColor: '#ffffff',
+  emptyColor: isDarkMode() ? '#181818' : '#ffffff',
   colorVariation: 12,
   tickSpeed: 25,
 } as Config;
@@ -75,3 +75,10 @@ export const getConfig = (): Config => {
     return config;
   }
 }
+
+window.matchMedia('(prefers-color-scheme: dark)').matches && (() => {
+  const newConfig = getConfig();
+  newConfig.emptyColor = '#181818';
+  updateConfig(newConfig);
+
+})();

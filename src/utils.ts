@@ -112,3 +112,11 @@ export const colorGrade = (color: string): string => {
 
   return `#${toHex(gradeChannel(r))}${toHex(gradeChannel(g))}${toHex(gradeChannel(b))}`;
 }
+
+/**
+ * Check if user prefers dark mode
+ * @returns True if user prefers dark mode
+ */
+export const isDarkMode = (): boolean => {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}

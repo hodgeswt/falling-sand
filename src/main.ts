@@ -1,4 +1,5 @@
-import { getConfig, GrainColorMode } from "./config";
+import { getConfig, GrainColorMode, resetConfigToDefault } from "./config";
+import { updateConfig } from "./config";
 import { colorGrade, gridPosToCoords, CellType, getRainbowColor } from "./utils";
 import {
   addGrain,
@@ -16,6 +17,7 @@ const canvasContainer = document.getElementById(
 
 let world: World = newWorld({ width: 0, height: 0 }, { width: 0, height: 0 });
 let firstLoop = true;
+let modalOpen = false;
 
 const resetWorld = () => {
   canvas.width = canvasContainer.clientWidth;
@@ -79,7 +81,7 @@ const gameLoop = (time: number) => {
   prevTime = time;
 
   let grainAdded = false;
-  if (pointerDown) {
+  if (pointerDown && !modalOpen) {
     grainAdded = true;
     addGrain(world, pointerCoords);
   }
@@ -141,3 +143,66 @@ const gameLoop = (time: number) => {
 
 // Start game
 window.requestAnimationFrame(gameLoop);
+
+// --- Config Modal Logic ---
+const openBtn = document.getElementById("open-config-modal") as HTMLButtonElement;
+const modal = document.getElementById("config-modal") as HTMLDivElement;
+const form = document.getElementById("config-form") as HTMLFormElement;
+const cancelBtn = document.getElementById("cancel-modal") as HTMLButtonElement;
+const resetBtn = document.getElementById("reset-default-config") as HTMLButtonElement;
+
+// Info modal elements
+const infoBtn = document.getElementById("open-info-modal") as HTMLButtonElement;
+const infoModal = document.getElementById("info-modal") as HTMLDivElement;
+const closeInfoBtn = document.getElementById("close-info-modal") as HTMLButtonElement;
+infoBtn.addEventListener("click", () => {
+  modalOpen = true;
+  infoModal.style.display = "flex";
+});
+
+closeInfoBtn.addEventListener("click", () => {
+  modalOpen = false;
+  infoModal.style.display = "none";
+});
+resetBtn.addEventListener("click", () => {
+  resetConfigToDefault();
+  hideModal();
+  resetWorld();
+});
+
+function showModal() {
+  modalOpen = true;
+  const config = getConfig();
+  (form.elements.namedItem("grainSize") as HTMLInputElement).value = config.grainSize.toString();
+  (form.elements.namedItem("grainColorMode") as HTMLSelectElement).value = config.grainColorMode;
+  (form.elements.namedItem("grainBaseColor") as HTMLInputElement).value = config.grainBaseColor;
+  (form.elements.namedItem("groundColor") as HTMLInputElement).value = config.groundColor;
+  (form.elements.namedItem("emptyColor") as HTMLInputElement).value = config.emptyColor;
+  (form.elements.namedItem("colorVariation") as HTMLInputElement).value = config.colorVariation.toString();
+  modal.style.display = "flex";
+}
+
+function hideModal() {
+  modalOpen = false;
+  modal.style.display = "none";
+}
+
+openBtn.addEventListener("click", showModal);
+cancelBtn.addEventListener("click", hideModal);
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const config = getConfig();
+  const newConfig = {
+    grainSize: parseInt((form.elements.namedItem("grainSize") as HTMLInputElement).value),
+    grainColorMode: (form.elements.namedItem("grainColorMode") as HTMLSelectElement).value as GrainColorMode,
+    grainBaseColor: (form.elements.namedItem("grainBaseColor") as HTMLInputElement).value,
+    groundColor: (form.elements.namedItem("groundColor") as HTMLInputElement).value,
+    emptyColor: (form.elements.namedItem("emptyColor") as HTMLInputElement).value,
+    colorVariation: parseInt((form.elements.namedItem("colorVariation") as HTMLInputElement).value),
+    tickSpeed: config.tickSpeed, // keep tickSpeed unchanged
+  };
+  updateConfig(newConfig);
+  hideModal();
+  resetWorld();
+});

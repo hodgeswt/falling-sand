@@ -1,3 +1,4 @@
+import { getConfig } from "./config";
 import { coordsToGridPos, CellType } from "./utils";
 
 /**

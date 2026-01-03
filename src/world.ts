@@ -1,5 +1,4 @@
-import { CellType } from "./constants";
-import { coordsToGridPos } from "./utils";
+import { coordsToGridPos, CellType } from "./utils";
 
 /**
  * A generic size representing a width + height
@@ -122,13 +121,14 @@ const isValidCoord = (world: World, coords: Coords): boolean => {
  * Updates all the grain positions in the world
  * @param world Game object
  * @param dt Time since last tick
- * @returns Nothing
+ * @returns Boolean indicating if change has occurred
  */
-export const updateGrainPositions = (world: World, dt: number) => {
+export const updateGrainPositions = (world: World, dt: number): boolean => {
   if (dt <= 0) {
-    return;
+    return false;
   }
 
+  let o = false;
   for (let x = 0; x < world.size.width; x++) {
     for (let y = world.size.height - 1; y >= 0; y--) {
       if (!isValidCoord(world, { x: x, y: y })) {
@@ -146,6 +146,7 @@ export const updateGrainPositions = (world: World, dt: number) => {
       ) {
         world.grid[x][y] = CellType.EMPTY;
         world.grid[x][y + 1] = CellType.GRAIN;
+        o = true;
         continue;
       }
 
@@ -158,6 +159,7 @@ export const updateGrainPositions = (world: World, dt: number) => {
       ) {
         world.grid[x][y] = CellType.EMPTY;
         world.grid[x + 1][y + 1] = CellType.GRAIN;
+        o = true;
         continue;
       }
 
@@ -167,10 +169,13 @@ export const updateGrainPositions = (world: World, dt: number) => {
       ) {
         world.grid[x][y] = CellType.EMPTY;
         world.grid[x - 1][y + 1] = CellType.GRAIN;
+        o = true;
         continue;
       }
 
       // Otherwise, do nothing
     }
   }
+
+  return o;
 };

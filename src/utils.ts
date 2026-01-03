@@ -1,5 +1,35 @@
-import { COLOR_VARIATION } from "./constants";
+import { getConfig } from "./config";
 import { Coords, World } from "./world";
+
+export enum CellType {
+  EMPTY = 0,
+  GRAIN = 1,
+  GROUND = 2,
+}
+
+/**
+ * Primitive types in JavaScript/TypeScript
+ */
+export type Primitive = string | number | boolean;
+
+/**
+ * Check if object is not null/undefined
+ * @param obj Object to check
+ * @returns True if object is not null/undefined
+ */
+export const defined = (obj: any): obj is Object => {
+  return obj !== undefined && obj !== null;
+}
+
+/**
+ * Check if object is of primitive type
+ * @param obj Object to check
+ * @param t Type to validate
+ * @returns Boolean indicating if object is of type
+ */
+export const isType = <T extends Primitive>(obj: any, t: T): obj is T => {
+  return defined(obj) && typeof obj === t;
+}
 
 /**
  * Convert canvas coords to grid position
@@ -51,15 +81,14 @@ export const colorGrade = (color: string): string => {
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
+  const config = getConfig();
 
   const gradeChannel = (channel: number): number => {
-    const change = Math.random() * COLOR_VARIATION * 2 - COLOR_VARIATION;
+    const change = Math.random() * config.colorVariation * 2 - config.colorVariation;
     const newChannel = Math.round(channel + change);
 
     return Math.max(0, Math.min(255, newChannel));
   }
 
-  const o = `#${toHex(gradeChannel(r))}${toHex(gradeChannel(g))}${toHex(gradeChannel(b))}`;
-  console.log('new color' + o)
-  return o;
+  return `#${toHex(gradeChannel(r))}${toHex(gradeChannel(g))}${toHex(gradeChannel(b))}`;
 }

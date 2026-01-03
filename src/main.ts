@@ -1,11 +1,5 @@
-import {
-  CellType,
-  EMPTY_COLOR,
-  GRAIN_BASE_COLOR,
-  GRAIN_SIZE,
-  GROUND_COLOR,
-} from "./constants";
-import { colorGrade, gridPosToCoords } from "./utils";
+import { getConfig } from "./config";
+import { colorGrade, gridPosToCoords, CellType } from "./utils";
 import {
   addGrain,
   Coords,
@@ -16,18 +10,22 @@ import {
 } from "./world";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
-const canvasContainer = document.getElementById("game-container") as HTMLElement;
+const canvasContainer = document.getElementById(
+  "game-container"
+) as HTMLElement;
 
 let world: World = newWorld({ width: 0, height: 0 }, { width: 0, height: 0 });
+let firstLoop = true;
 
 const resetWorld = () => {
   canvas.width = canvasContainer.clientWidth;
   canvas.height = canvasContainer.clientHeight;
+  firstLoop = true;
 
   const [gridSize, canvasSize] = getWorldSize(
     canvas.width,
     canvas.height,
-    GRAIN_SIZE
+    getConfig().grainSize
   );
 
   world = newWorld(gridSize, canvasSize);
@@ -64,6 +62,7 @@ let prevTime: number = 0.0;
 
 const ctx = canvas.getContext("2d");
 
+
 /**
  * Main game loop
  * @param time Current time
@@ -71,43 +70,61 @@ const ctx = canvas.getContext("2d");
  */
 const gameLoop = (time: number) => {
   const dt = time - prevTime;
-  if (dt < 25) {
+  const config = getConfig();
+
+  // Prevent running too fast
+  if (dt < config.tickSpeed) {
     window.requestAnimationFrame(gameLoop);
     return;
   }
   prevTime = time;
 
+  let grainAdded = false;
   if (pointerDown) {
+    grainAdded = true;
     addGrain(world, pointerCoords);
   }
 
-  updateGrainPositions(world, dt);
+  // Don't repaint unless:
+  // 1. This is our first render
+  // 2. We've added a grain
+  // 3. Our grains have moved
+  if (!updateGrainPositions(world, dt) && !grainAdded && !firstLoop) {
+    window.requestAnimationFrame(gameLoop);
+    return;
+  }
+
+  firstLoop = false;
 
   for (let x = 0; x < world.size.width; x++) {
     for (let y = 0; y < world.size.height; y++) {
+      // Paint our grains
       if (world.grid[x][y] === CellType.GRAIN) {
         const coords = gridPosToCoords(world, { x: x, y: y });
         if (ctx) {
           let fillColor = world.colorCache[x][y];
-          console.log(fillColor);
-          if (fillColor === '') {
-            world.colorCache[x][y] = colorGrade(GRAIN_BASE_COLOR);
-            fillColor = colorGrade(GRAIN_BASE_COLOR);
+          if (fillColor === "") {
+            world.colorCache[x][y] = colorGrade(config.grainBaseColor);
+            fillColor = colorGrade(config.grainBaseColor);
           }
           ctx.fillStyle = fillColor;
-          ctx.fillRect(coords.x, coords.y, GRAIN_SIZE, GRAIN_SIZE);
+          ctx.fillRect(coords.x, coords.y, config.grainSize, config.grainSize);
         }
-      } else if (world.grid[x][y] === CellType.GROUND) {
+      }
+      // Paint our ground
+      else if (world.grid[x][y] === CellType.GROUND) {
         const coords = gridPosToCoords(world, { x: x, y: y });
         if (ctx) {
-          ctx.fillStyle = GROUND_COLOR;
-          ctx.fillRect(coords.x, coords.y, GRAIN_SIZE, GRAIN_SIZE);
+          ctx.fillStyle = config.groundColor;
+          ctx.fillRect(coords.x, coords.y, config.grainSize, config.grainSize);
         }
-      } else if (world.grid[x][y] === CellType.EMPTY) {
+      }
+      // Clear empty cells
+      else if (world.grid[x][y] === CellType.EMPTY) {
         const coords = gridPosToCoords(world, { x: x, y: y });
         if (ctx) {
-          ctx.fillStyle = EMPTY_COLOR;
-          ctx.fillRect(coords.x, coords.y, GRAIN_SIZE, GRAIN_SIZE);
+          ctx.fillStyle = config.emptyColor;
+          ctx.fillRect(coords.x, coords.y, config.grainSize, config.grainSize);
         }
       }
     }
